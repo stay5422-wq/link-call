@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/token", "destination": "/api/token" },
+    { "source": "/voice", "destination": "/api/voice" },
+    { "source": "/recordings", "destination": "/api/recordings" },
+    { "source": "/call-history", "destination": "/api/call-history" },
+    { "source": "/recording-status", "destination": "/api/recording-status" }
+  ]
+}
