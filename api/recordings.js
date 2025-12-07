@@ -13,6 +13,11 @@ module.exports = async (req, res) => {
         const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
         const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
         
+        if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
+            console.error('Missing Twilio credentials');
+            return res.status(500).json({ error: 'Server configuration error' });
+        }
+        
         const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
         const recordings = await twilioClient.recordings.list({ limit: 50 });
         
