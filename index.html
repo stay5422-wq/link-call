@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Call</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📞</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="container">
+        <!-- الشريط الجانبي -->
+        <div class="sidebar">
+            <div class="menu-item active" id="dialpad-btn">
+                <div class="icon">📞</div>
+                <div class="label">لوحة المفاتيح</div>
+            </div>
+            
+            <div class="menu-item" id="contacts-btn">
+                <div class="icon">👥</div>
+                <div class="label">جهات الاتصال</div>
+            </div>
+            
+            <div class="menu-item" id="call-history-btn">
+                <div class="icon">📅</div>
+                <div class="label">سجل المكالمات</div>
+            </div>
+            
+            <div class="menu-item" id="recordings-btn">
+                <div class="icon notification">🎙️</div>
+                <span class="badge hidden" id="recordings-badge">0</span>
+                <div class="label">المحفوظات</div>
+            </div>
+            
+            <div class="menu-item" id="settings-btn">
+                <div class="icon">⚙️</div>
+                <div class="label">الإعدادات</div>
+            </div>
+            
+            <div class="bottom-logo-container">
+                <img src="logo.jpg" alt="Link Call" class="bottom-logo-img">
+                <div class="online-indicator"></div>
+            </div>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <div class="header">
+                <div class="header-top">
+                    <h1>رقم الهاتف</h1>
+                    <div class="user-info-header">
+                        <div class="user-badge">
+                            <span class="user-icon">👤</span>
+                            <div class="user-text">
+                                <span class="user-name-header" id="header-username">--</span>
+                                <span class="user-role-header" id="header-role">--</span>
+                            </div>
+                        </div>
+                        <button class="logout-header-btn" id="logout-header-btn" title="تسجيل خروج">
+                            <span class="logout-icon">🚪</span>
+                            <span class="logout-text">خروج</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="phone-display">
+                    <div class="phone-number" id="display-number"></div>
+                    <button class="delete-btn hidden" id="delete-btn">⌫</button>
+                </div>
+            </div>
+
+            <!-- لوحة الأرقام -->
+            <div class="dialpad" id="dialpad">
+                <div class="number-pad">
+                    <button class="num-btn" data-num="1">
+                        <span class="number">1</span>
+                    </button>
+                    <button class="num-btn" data-num="2">
+                        <span class="number">2</span>
+                        <span class="letters">ABC</span>
+                    </button>
+                    <button class="num-btn" data-num="3">
+                        <span class="number">3</span>
+                        <span class="letters">DEF</span>
+                    </button>
+                    
+                    <button class="num-btn" data-num="4">
+                        <span class="number">4</span>
+                        <span class="letters">GHI</span>
+                    </button>
+                    <button class="num-btn" data-num="5">
+                        <span class="number">5</span>
+                        <span class="letters">JKL</span>
+                    </button>
+                    <button class="num-btn" data-num="6">
+                        <span class="number">6</span>
+                        <span class="letters">MNO</span>
+                    </button>
+                    
+                    <button class="num-btn" data-num="7">
+                        <span class="number">7</span>
+                        <span class="letters">PQRS</span>
+                    </button>
+                    <button class="num-btn" data-num="8">
+                        <span class="number">8</span>
+                        <span class="letters">TUV</span>
+                    </button>
+                    <button class="num-btn" data-num="9">
+                        <span class="number">9</span>
+                        <span class="letters">WXYZ</span>
+                    </button>
+                    
+                    <button class="num-btn" data-num="*">
+                        <span class="number">*</span>
+                    </button>
+                    <button class="num-btn" data-num="0">
+                        <span class="number">0</span>
+                        <span class="letters">+</span>
+                    </button>
+                    <button class="num-btn" data-num="#">
+                        <span class="number">#</span>
+                    </button>
+                </div>
+
+                <button class="call-btn" id="call-btn">
+                    📞
+                </button>
+
+                <div class="quick-dial">اتصال سريع</div>
+            </div>
+
+            <!-- شاشة المكالمة -->
+            <div class="call-screen hidden" id="call-screen">
+                <div class="call-info">
+                    <div class="call-status" id="call-status">جاري الاتصال...</div>
+                    <div class="call-number" id="call-number"></div>
+                    <div class="call-duration" id="call-duration">00:00</div>
+                    <div class="recording-status hidden" id="recording-status">
+                        🔴 جاري التسجيل
+                    </div>
+                </div>
+                
+                <div class="call-controls">
+                    <button class="control-btn" id="mute-btn">
+                        <span class="icon">🔇</span>
+                        <span class="label">كتم الصوت</span>
+                    </button>
+                    <button class="control-btn" id="hold-btn">
+                        <span class="icon">⏸️</span>
+                        <span class="label">إيقاف مؤقت</span>
+                    </button>
+                    <button class="control-btn end-call" id="end-call-btn">
+                        <span class="icon">📞</span>
+                        <span class="label">إنهاء</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- سجل المكالمات -->
+            <div class="call-history-list hidden" id="call-history-list">
+                <h2>سجل المكالمات</h2>
+                <div id="call-history-container">
+                    <div class="empty-state">
+                        <div class="empty-icon">📞</div>
+                        <p>لا توجد مكالمات حتى الآن</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- جهات الاتصال -->
+            <div class="contacts-list hidden" id="contacts-list">
+                <div class="contacts-header">
+                    <h2>جهات الاتصال</h2>
+                    <button class="add-contact-btn" id="add-contact-btn">
+                        <span>+</span> إضافة جهة اتصال
+                    </button>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="contact-search" placeholder="ابحت عن جهة اتصال...">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div id="contacts-container">
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <p>لا توجد جهات اتصال</p>
+                        <button class="add-contact-btn-empty">إضافة جهة اتصال</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قائمة التسجيلات -->
+            <div class="recordings-list hidden" id="recordings-list">
+                <h2>التسجيلات المحفوظة</h2>
+                <div id="recordings-container"></div>
+            </div>
+
+            <!-- الإعدادات -->
+            <div class="settings-panel hidden" id="settings-panel">
+                <h2>الإعدادات</h2>
+                <div class="settings-content">
+                    <div class="settings-section">
+                        <div class="settings-header">
+                            <div class="app-icon">
+                                <img src="logo.jpg" alt="Link Call">
+                            </div>
+                            <div class="app-info">
+                                <h3>Link Call</h3>
+                                <p class="version">الإصدار 1.0.0</p>
+                                <p class="build-date">بناء December 7, 2025</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>معلومات الحساب</h4>
+                        <div class="setting-item">
+                            <span class="setting-label">رقم Twilio</span>
+                            <span class="setting-value">+1 320 433 6644</span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">حالة الاتصال</span>
+                            <span class="setting-value status-online">متصل</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>إعدادات الصوت</h4>
+                        <div class="setting-item">
+                            <span class="setting-label">تسجيل المكالمات تلقائياً</span>
+                            <label class="switch">
+                                <input type="checkbox" id="auto-record" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">جودة الصوت</span>
+                            <select class="setting-select">
+                                <option value="high">عالية</option>
+                                <option value="medium" selected>متوسطة</option>
+                                <option value="low">منخفضة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>الإشعارات</h4>
+                        <div class="setting-item">
+                            <span class="setting-label">إشعارات المكالمات الواردة</span>
+                            <label class="switch">
+                                <input type="checkbox" id="call-notifications" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">صوت الرنين</span>
+                            <label class="switch">
+                                <input type="checkbox" id="ringtone-sound" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-section" id="employees-section">
+                        <h4>🔐 إدارة الموظفين (للمطور فقط)</h4>
+                        <div class="employees-container">
+                            <div class="add-employee-form">
+                                <h5>إضافة موظف جديد</h5>
+                                <div class="form-group">
+                                    <input type="text" id="emp-username" placeholder="اسم المستخدم" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" id="emp-password" placeholder="كلمة المرور" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="emp-fullname" placeholder="الاسم الكامل" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>الصلاحيات:</label>
+                                    <div class="permissions-grid">
+                                        <label class="permission-item">
+                                            <input type="checkbox" class="emp-permission" value="make_calls" checked>
+                                            <span>إجراء مكالمات</span>
+                                        </label>
+                                        <label class="permission-item">
+                                            <input type="checkbox" class="emp-permission" value="view_history">
+                                            <span>عرض السجل</span>
+                                        </label>
+                                        <label class="permission-item">
+                                            <input type="checkbox" class="emp-permission" value="view_recordings">
+                                            <span>عرض التسجيلات</span>
+                                        </label>
+                                        <label class="permission-item">
+                                            <input type="checkbox" class="emp-permission" value="manage_contacts">
+                                            <span>إدارة جهات الاتصال</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button class="add-employee-btn" id="add-employee-btn">➕ إضافة موظف</button>
+                            </div>
+                            
+                            <div class="employees-list">
+                                <h5>الموظفين الحاليين</h5>
+                                <div id="employees-list-container">
+                                    <!-- سيتم إضافة الموظفين هنا -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h4>عنا</h4>
+                        <div class="about-text">
+                            <p>Link Call - تطبيق مكالمات سحابي متكامل مع Twilio</p>
+                            <p class="copyright">© 2025 ENG/AKRAM ELMASRY. جميع الحقوق محفوظة.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- حالة الاتصال -->
+        <div class="connection-status" id="connection-status">
+            <span class="status-dot"></span>
+            <span id="status-text">جاري الاتصال بـ Twilio...</span>
+        </div>
+    </div>
+
+    <script>
+        // التحقق من تسجيل الدخول
+        if (!sessionStorage.getItem('isLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <script src="https://sdk.twilio.com/js/client/releases/1.14.0/twilio.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // إنشاء النجوم المتحركة
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 100;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        createStars();
+    </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - Link Call</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📞</text></svg>">
+    <link rel="stylesheet" href="login-style.css">
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo-container">
+                <img src="logo.jpg" alt="Link Call" class="login-logo">
+            </div>
+            
+            <h1>تسجيل الدخول</h1>
+            <p class="subtitle">Link Call - نظام المكالمات السحابي</p>
+            
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="username">اسم المستخدم</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                    <span class="icon">👤</span>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">كلمة المرور</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                    <span class="icon">🔒</span>
+                    <button type="button" class="toggle-password" id="toggle-password">👁️</button>
+                </div>
+                
+                <div class="error-message hidden" id="error-message">
+                    ⚠️ اسم المستخدم أو كلمة المرور غير صحيحة
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <span>دخول</span>
+                    <span class="arrow">→</span>
+                </button>
+            </form>
+            
+            <div class="footer-text">
+                <p>© 2025 ENG/AKRAM ELMASRY</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // إنشاء النجوم
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 100;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        createStars();
+        
+        // معالجة تسجيل الدخول
+        const loginForm = document.getElementById('login-form');
+        const errorMessage = document.getElementById('error-message');
+        const togglePassword = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+        
+        // بيانات المطور الأساسية
+        const adminUsername = 'akram';
+        const adminPassword = 'Aazxc';
+        
+        // الحصول على قائمة الموظفين
+        function getEmployees() {
+            const employees = localStorage.getItem('employees');
+            return employees ? JSON.parse(employees) : [];
+        }
+        
+        // التحقق من بيانات الدخول
+        function validateLogin(username, password) {
+            // التحقق من المطور
+            if (username === adminUsername && password === adminPassword) {
+                return { valid: true, role: 'admin', fullname: 'المطور الرئيسي', permissions: ['all'] };
+            }
+            
+            // التحقق من الموظفين
+            const employees = getEmployees();
+            const employee = employees.find(emp => emp.username === username && emp.password === password);
+            
+            if (employee) {
+                return { 
+                    valid: true, 
+                    role: 'employee', 
+                    fullname: employee.fullname,
+                    permissions: employee.permissions 
+                };
+            }
+            
+            return { valid: false };
+        }
+        
+        // إظهار/إخفاء كلمة المرور
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+        
+        // معالجة النموذج
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            const loginResult = validateLogin(username, password);
+            
+            if (loginResult.valid) {
+                // حفظ بيانات تسجيل الدخول
+                sessionStorage.setItem('isLoggedIn', 'true');
+                sessionStorage.setItem('username', username);
+                sessionStorage.setItem('userRole', loginResult.role);
+                sessionStorage.setItem('fullname', loginResult.fullname);
+                sessionStorage.setItem('permissions', JSON.stringify(loginResult.permissions));
+                
+                // إضافة تأثير نجاح
+                loginForm.classList.add('success');
+                
+                // الانتقال إلى الصفحة الرئيسية
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 500);
+            } else {
+                // إظهار رسالة خطأ
+                errorMessage.classList.remove('hidden');
+                loginForm.classList.add('shake');
+                
+                setTimeout(() => {
+                    loginForm.classList.remove('shake');
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>
