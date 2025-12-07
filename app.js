@@ -60,8 +60,8 @@ async function initializeApp() {
             throw new Error('لم يتم الحصول على التوكن');
         }
 
-        // تهيئة Twilio Device مع الإعدادات الصحيحة
-        twilioDevice = new Twilio.Device(data.token, {
+        // تهيئة Twilio Device باستخدام setup للإصدار 1.x
+        Twilio.Device.setup(data.token, {
             codecPreferences: ['opus', 'pcmu'],
             fakeLocalDTMF: true,
             enableRingingState: true,
@@ -69,6 +69,8 @@ async function initializeApp() {
             answerOnBridge: true,
             closeProtection: true
         });
+        
+        twilioDevice = Twilio.Device;
 
         // معالجة الأحداث
         twilioDevice.on('ready', () => {
