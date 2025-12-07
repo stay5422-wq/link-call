@@ -21,29 +21,27 @@ module.exports = async (req, res) => {
 
         const identity = 'link_call_user_' + Date.now();
         
-        const AccessToken = twilio.jwt.AccessToken;
-        const VoiceGrant = AccessToken.VoiceGrant;
+        // استخدام ClientCapability بدلاً من AccessToken
+        const capability = new twilio.jwt.ClientCapability({
+            accountSid: TWILIO_ACCOUNT_SID,
+            authToken: TWILIO_AUTH_TOKEN,
+            ttl: 14400
+        });
         
-        // استخدام Account SID و Auth Token مباشرة (بدون API Keys)
-        const token = new AccessToken(
-            TWILIO_ACCOUNT_SID,
-            TWILIO_ACCOUNT_SID,
-            TWILIO_AUTH_TOKEN,
-            { 
-                identity: identity,
-                ttl: 14400  // 4 hours
-            }
+        // السماح بالمكالمات الصادرة
+        capability.addScope(
+            new twilio.jwt.ClientCapability.OutgoingClientScope({
+                applicationSid: TWILIO_TWIML_APP_SID
+            })
+        );
+        
+        // السماح بالمكالمات الواردة
+        capability.addScope(
+            new twilio.jwt.ClientCapability.IncomingClientScope(identity)
         );
 
-        const voiceGrant = new VoiceGrant({
-            outgoingApplicationSid: TWILIO_TWIML_APP_SID,
-            incomingAllow: true,
-        });
-
-        token.addGrant(voiceGrant);
-
         res.status(200).json({
-            token: token.toJwt(),
+            token: capability.toJwt(),
             identity: identity
         });
     } catch (error) {
