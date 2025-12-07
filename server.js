@@ -28,6 +28,13 @@ app.get('/token', (req, res) => {
     try {
         const identity = 'link_call_user_' + Date.now();
         
+        // التحقق من وجود المتغيرات
+        console.log('Generating token with:');
+        console.log('Account SID:', TWILIO_ACCOUNT_SID ? 'Set (length: ' + TWILIO_ACCOUNT_SID.length + ')' : 'Missing');
+        console.log('API Key:', TWILIO_API_KEY ? 'Set (starts with: ' + TWILIO_API_KEY.substring(0, 6) + ')' : 'Missing');
+        console.log('API Secret:', TWILIO_API_SECRET ? 'Set (length: ' + TWILIO_API_SECRET.length + ')' : 'Missing');
+        console.log('TwiML App SID:', TWILIO_TWIML_APP_SID ? 'Set' : 'Missing');
+        
         const AccessToken = twilio.jwt.AccessToken;
         const VoiceGrant = AccessToken.VoiceGrant;
         
