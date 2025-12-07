@@ -53,12 +53,20 @@ async function initializeApp() {
     try {
         // جلب التوكن من الخادم
         const baseUrl = window.location.origin;
-        const response = await fetch(`${baseUrl}/token`);
+        const response = await fetch(`${baseUrl}/token`, {
+            cache: 'no-cache',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
         const data = await response.json();
         
         if (!data.token) {
             throw new Error('لم يتم الحصول على التوكن');
         }
+
+        console.log('Token received:', data.token.substring(0, 50) + '...');
 
         // تهيئة Twilio Device باستخدام setup للإصدار 1.x
         Twilio.Device.setup(data.token, {
