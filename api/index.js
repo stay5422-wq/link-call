@@ -53,12 +53,24 @@ async function getEmployeesData() {
 }
 
 async function saveEmployeesData(data) {
+    console.log('💾 محاولة حفظ البيانات...', {
+        employeesCount: data.employees.length,
+        isVercel: !!process.env.VERCEL,
+        hasKV: !!kv
+    });
+    
     if (kv && process.env.VERCEL) {
         try {
             await kv.set('employees_data', data);
+            console.log('✅ تم حفظ البيانات في Vercel KV بنجاح');
+            
+            // التحقق من الحفظ
+            const saved = await kv.get('employees_data');
+            console.log('✅ تم التحقق: عدد الموظفين المحفوظين:', saved?.employees?.length || 0);
+            
             return true;
         } catch (error) {
-            console.error('خطأ في حفظ KV:', error);
+            console.error('❌ خطأ في حفظ KV:', error);
             return false;
         }
     } else {
@@ -69,9 +81,10 @@ async function saveEmployeesData(data) {
                 JSON.stringify(data, null, 2)
             );
             employeesData = data;
+            console.log('✅ تم حفظ البيانات في الملف المحلي');
             return true;
         } catch (error) {
-            console.error('خطأ في حفظ الملف:', error);
+            console.error('❌ خطأ في حفظ الملف:', error);
             return false;
         }
     }
@@ -1053,6 +1066,27 @@ app.delete('/employees/:id', async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         console.error('خطأ في حذف موظف:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// endpoint لعرض حالة البيانات (للتشخيص)
+app.get('/debug/data-status', async (req, res) => {
+    try {
+        const data = await getEmployeesData();
+        res.json({
+            totalEmployees: data.employees.length,
+            employees: data.employees.map(emp => ({
+                id: emp.id,
+                name: emp.name,
+                username: emp.username,
+                department: emp.department
+            })),
+            departments: data.departments,
+            isVercel: !!process.env.VERCEL,
+            hasKV: !!kv
+        });
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
