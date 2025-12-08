@@ -705,12 +705,25 @@ app.get('/recordings', async (req, res) => {
         // فلترة التسجيلات حسب الصلاحيات
         let filteredRecordings = recordingsData;
         
+        console.log('📋 فلترة التسجيلات:', {
+            employeeId,
+            viewAll,
+            totalRecordings: recordingsData.length,
+            shouldFilter: employeeId && viewAll !== 'true'
+        });
+        
         if (employeeId && viewAll !== 'true') {
             // إذا كان موظف وليس لديه صلاحية رؤية الكل، نعرض تسجيلاته فقط
-            filteredRecordings = recordingsData.filter(rec => 
-                rec.employeeId === employeeId || rec.employeeId === String(employeeId)
-            );
-            console.log('🔍 تم فلترة:', filteredRecordings.length, 'من إجمالي', recordingsData.length);
+            filteredRecordings = recordingsData.filter(rec => {
+                const match = rec.employeeId === employeeId || 
+                             rec.employeeId === String(employeeId) ||
+                             rec.employeeId === parseInt(employeeId);
+                console.log(`🔍 مقارنة: rec.employeeId="${rec.employeeId}" مع employeeId="${employeeId}" = ${match}`);
+                return match;
+            });
+            console.log(`✅ تم فلترة: ${filteredRecordings.length} من إجمالي ${recordingsData.length}`);
+        } else {
+            console.log('🌐 عرض جميع التسجيلات (admin أو viewAll)');
         }
         
         res.json({ recordings: filteredRecordings });

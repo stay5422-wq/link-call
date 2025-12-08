@@ -510,18 +510,19 @@ async function loadRecordings() {
         const baseUrl = window.location.origin;
         const employeeId = sessionStorage.getItem('employeeId');
         
-        console.log('📋 جلب التسجيلات - employeeId:', employeeId, 'userRole:', userRole);
+        console.log('📋 جلب التسجيلات - employeeId:', employeeId, 'userRole:', userRole, 'canViewAll:', canViewAll);
         
         // بناء URL مع المعاملات
         let url = `${baseUrl}/recordings`;
         const params = new URLSearchParams();
         
-        if (employeeId && (userRole !== 'admin')) {
+        // إذا كان موظف وليس لديه صلاحية رؤية الكل
+        if (employeeId && !canViewAll && userRole !== 'admin') {
             params.append('employeeId', employeeId);
-        }
-        
-        if (canViewAll || userRole === 'admin') {
+            console.log('🔒 فلترة التسجيلات للموظف:', employeeId);
+        } else {
             params.append('viewAll', 'true');
+            console.log('🌐 عرض جميع التسجيلات');
         }
         
         if (params.toString()) {
@@ -536,6 +537,17 @@ async function loadRecordings() {
         recordings = data.recordings || [];
         
         console.log(`📊 تم جلب ${recordings.length} تسجيل`);
+        
+        // جلب بيانات الموظفين لعرض الأسماء
+        const employeesResponse = await fetch(`${baseUrl}/employees`);
+        const employeesData = await employeesResponse.json();
+        window.employeesMap = {};
+        if (employeesData && employeesData.employees) {
+            employeesData.employees.forEach(emp => {
+                window.employeesMap[emp.id] = emp.name;
+            });
+        }
+        console.log('👥 تم تحميل بيانات', Object.keys(window.employeesMap).length, 'موضف');
         
         displayRecordings();
         updateRecordingsBadge(recordings.length);
@@ -583,8 +595,17 @@ function displayRecordings() {
             minute: '2-digit'
         });
         
-        // استخراج رقم الهاتف من callSid أو from/to
-        const phoneNumber = recording.to || recording.from || 'غير محدد';
+        // استخراج رقم الهاتف (الرقم المتصل به)
+        let phoneNumber = recording.to || 'غير محدد';
+        // تنظيف رقم الهاتف
+        if (phoneNumber.startsWith('+')) {
+            phoneNumber = phoneNumber.substring(1);
+        }
+        
+        // الحصول على اسم الموظف من employeeId
+        const employeeName = window.employeesMap && recording.employeeId 
+            ? (window.employeesMap[recording.employeeId] || window.employeesMap[String(recording.employeeId)] || 'غير معروف')
+            : 'غير معروف';
         
         // حساب المدة بالدقائق والثواني
         const duration = recording.duration || 0;
@@ -606,7 +627,7 @@ function displayRecordings() {
                             ${phoneNumber}
                         </div>
                         <div style="font-size: 12px; color: #666;">
-                            بواسطة: ${currentUser}
+                            بواسطة: ${employeeName}
                         </div>
                     </div>
                 </div>
