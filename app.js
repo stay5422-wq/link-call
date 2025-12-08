@@ -508,7 +508,7 @@ async function loadRecordings() {
         }
         
         const baseUrl = window.location.origin;
-        const employeeId = sessionStorage.getItem('employeeId');
+        const employeeId = localStorage.getItem('employeeId');
         
         console.log('📋 جلب التسجيلات - employeeId:', employeeId, 'userRole:', userRole, 'canViewAll:', canViewAll);
         

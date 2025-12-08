@@ -715,13 +715,18 @@ app.get('/recordings', async (req, res) => {
         if (employeeId && viewAll !== 'true') {
             // إذا كان موظف وليس لديه صلاحية رؤية الكل، نعرض تسجيلاته فقط
             filteredRecordings = recordingsData.filter(rec => {
+                // تجاهل التسجيلات بدون employeeId (قديمة)
+                if (!rec.employeeId || rec.employeeId === 'unknown') {
+                    return false;
+                }
+                
                 const match = rec.employeeId === employeeId || 
                              rec.employeeId === String(employeeId) ||
                              rec.employeeId === parseInt(employeeId);
                 console.log(`🔍 مقارنة: rec.employeeId="${rec.employeeId}" مع employeeId="${employeeId}" = ${match}`);
                 return match;
             });
-            console.log(`✅ تم فلترة: ${filteredRecordings.length} من إجمالي ${recordingsData.length}`);
+            console.log(`✅ تم فلترة: ${filteredRecordings.length} من إجمالي ${recordingsData.length} (تم تجاهل التسجيلات القديمة)`);
         } else {
             console.log('🌐 عرض جميع التسجيلات (admin أو viewAll)');
         }
