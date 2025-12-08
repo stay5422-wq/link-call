@@ -242,9 +242,21 @@ async function makeCall() {
         
         // معالجة أحداث المكالمة
         currentCall.on('accept', () => {
-            console.log('✅ تم قبول المكالمة');
+            console.log('📞 المكالمة بدأت - جاري الاتصال بالعميل...');
+            updateCallStatus('جاري الاتصال... 📞');
+            // لا نبدأ العداد هنا - ننتظر العميل يرد
+        });
+        
+        currentCall.on('ringing', () => {
+            console.log('📞 الرنين...');
+            updateCallStatus('جاري الاتصال... 🔔');
+        });
+        
+        // هذا الحدث يُطلق عندما يرد العميل فعلياً
+        currentCall.on('connected', () => {
+            console.log('✅ العميل رد على المكالمة - بدء العداد');
             updateCallStatus('متصل ✅');
-            startCallTimer();
+            startCallTimer(); // نبدأ العداد هنا فقط
         });
         
         currentCall.on('disconnect', () => {
@@ -285,7 +297,7 @@ function handleIncomingCall(call) {
         callScreen.classList.remove('hidden');
         callNumber.textContent = call.parameters.From;
         updateCallStatus('متصل ✅');
-        startCallTimer();
+        startCallTimer(); // في المكالمة الواردة نبدأ العداد فوراً لأننا نحن من ردينا
         
         call.on('disconnect', () => {
             endCall();
@@ -1329,6 +1341,19 @@ if (contactSearch) {
             `;
             container.appendChild(item);
         });
+    });
+}
+
+// تسجيل Service Worker للـ PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+                console.log('✅ Service Worker مُسجل بنجاح:', registration.scope);
+            })
+            .catch(error => {
+                console.log('❌ فشل تسجيل Service Worker:', error);
+            });
     });
 }
 
