@@ -548,18 +548,69 @@ function displayRecordings() {
     });
 }
 
+// متغير لحفظ المشغل الحالي
+let currentAudio = null;
+let currentPlayButton = null;
+
 // تشغيل التسجيل
 async function playRecording(recordingSid) {
     try {
+        // إيقاف أي تسجيل يعمل حالياً
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+            if (currentPlayButton) {
+                currentPlayButton.innerHTML = '▶️ تشغيل';
+                currentPlayButton.style.background = '#4CAF50';
+            }
+        }
+        
         const baseUrl = window.location.origin;
-        // استخدام endpoint الجديد الذي لا يحتاج authentication
         const audioUrl = `${baseUrl}/play-recording/${recordingSid}`;
         const audio = new Audio(audioUrl);
+        
+        // البحت عن زر التشغيل
+        const playBtn = event.target;
+        currentPlayButton = playBtn;
+        
+        // تغيير الزر لـ "إيقاف"
+        playBtn.innerHTML = '⏸️ إيقاف';
+        playBtn.style.background = '#ff9800';
+        
         audio.play();
+        currentAudio = audio;
+        
         console.log('🎵 تشغيل التسجيل:', recordingSid);
+        
+        // عند انتهاء التسجيل
+        audio.onended = () => {
+            playBtn.innerHTML = '▶️ تشغيل';
+            playBtn.style.background = '#4CAF50';
+            currentAudio = null;
+            currentPlayButton = null;
+        };
+        
+        // عند الضغط على الزر مرة أخرى (لإيقاف)
+        playBtn.onclick = (e) => {
+            e.preventDefault();
+            if (currentAudio && !currentAudio.paused) {
+                currentAudio.pause();
+                playBtn.innerHTML = '▶️ تشغيل';
+                playBtn.style.background = '#4CAF50';
+                currentAudio = null;
+                currentPlayButton = null;
+            } else {
+                playRecording(recordingSid);
+            }
+        };
+        
     } catch (error) {
         console.error('خطأ في تشغيل التسجيل:', error);
         alert('فشل تشغيل التسجيل');
+        if (currentPlayButton) {
+            currentPlayButton.innerHTML = '▶️ تشغيل';
+            currentPlayButton.style.background = '#4CAF50';
+        }
     }
 }
 
