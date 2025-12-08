@@ -18,7 +18,83 @@ const PORT = 3000;
 
 // قراءة بيانات الموظفين (للتشغيل المحلي فقط)
 let employeesData = {
-    employees: [],
+    employees: [
+        {
+            id: 1,
+            name: "أميرة",
+            username: "amira",
+            password: "Aa123456",
+            department: "1",
+            phone: "",
+            permissions: {
+                viewOwnRecordings: true,
+                viewAllRecordings: false,
+                deleteRecordings: false,
+                editProfile: true
+            },
+            createdAt: "2025-12-08T00:00:00.000Z"
+        },
+        {
+            id: 2,
+            name: "ساهر",
+            username: "saher",
+            password: "Aa123456",
+            department: "2",
+            phone: "",
+            permissions: {
+                viewOwnRecordings: true,
+                viewAllRecordings: false,
+                deleteRecordings: false,
+                editProfile: true
+            },
+            createdAt: "2025-12-08T00:00:00.000Z"
+        },
+        {
+            id: 3,
+            name: "شاكر",
+            username: "shaker",
+            password: "Aa123456",
+            department: "3",
+            phone: "",
+            permissions: {
+                viewOwnRecordings: true,
+                viewAllRecordings: false,
+                deleteRecordings: false,
+                editProfile: true
+            },
+            createdAt: "2025-12-08T00:00:00.000Z"
+        },
+        {
+            id: 4,
+            name: "تسنيم",
+            username: "tasneem",
+            password: "Aa123456",
+            department: "4",
+            phone: "",
+            permissions: {
+                viewOwnRecordings: true,
+                viewAllRecordings: false,
+                deleteRecordings: false,
+                editProfile: true
+            },
+            createdAt: "2025-12-08T00:00:00.000Z"
+        },
+        {
+            id: 5,
+            name: "إسلام",
+            username: "eslam",
+            password: "Aa123456",
+            department: "5",
+            phone: "",
+            permissions: {
+                viewOwnRecordings: true,
+                viewAllRecordings: false,
+                deleteRecordings: false,
+                editProfile: true
+            },
+            createdAt: "2025-12-08T00:00:00.000Z"
+        }
+    ],
     departments: {
         "1": { name: "الحجوزات", employees: [] },
         "2": { name: "المبيعات", employees: [] },
@@ -838,27 +914,34 @@ app.post('/employees', async (req, res) => {
 // تهيئة KV من الملف (للمطور فقط)
 app.get('/init-kv', async (req, res) => {
     if (!kv || !process.env.VERCEL) {
-        return res.json({ error: 'KV غير متاح (تشغيل محلي)' });
+        return res.json({ error: 'KV غير متاح (تشغيل محلي)', data: employeesData });
     }
     
     try {
-        console.log('🔄 تهيئة Vercel KV من الملف...');
-        const success = await saveEmployeesData(employeesData);
+        console.log('🔄 تهيئة Vercel KV بالبيانات الافتراضية...');
+        console.log('📊 عدد الموظفين المراد حفظهم:', employeesData.employees.length);
         
-        if (success) {
-            const saved = await kv.get('employees_data');
-            return res.json({
-                success: true,
-                message: 'تم تهيئة KV بنجاح',
-                employeesCount: saved?.employees?.length || 0,
-                employees: saved?.employees || []
-            });
-        } else {
-            return res.status(500).json({ error: 'فشل في حفظ البيانات' });
-        }
+        // حفظ مباشر في KV
+        await kv.set('employees_data', employeesData);
+        console.log('✅ تم الحفظ في KV');
+        
+        // التحقق من الحفظ
+        const saved = await kv.get('employees_data');
+        console.log('✅ تم التحقق: عدد الموظفين المحفوظين:', saved?.employees?.length || 0);
+        
+        return res.json({
+            success: true,
+            message: 'تم تهيئة KV بنجاح',
+            employeesCount: saved?.employees?.length || 0,
+            employees: saved?.employees || []
+        });
     } catch (error) {
         console.error('❌ خطأ في تهيئة KV:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ 
+            error: error.message,
+            stack: error.stack,
+            defaultData: employeesData
+        });
     }
 });
 
