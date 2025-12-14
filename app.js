@@ -184,12 +184,12 @@ async function makeCall() {
     } else if (formattedNumber.startsWith('9665') && !formattedNumber.startsWith('+')) {
         formattedNumber = '+' + formattedNumber;
     }
-    // تحويل الأرقام المصرية
-    else if (formattedNumber.startsWith('01')) {
+    // تحويل الأرقام المصرية (01, 010, 011, 012, 015, 017)
+    else if (formattedNumber.startsWith('01') && formattedNumber.length === 11) {
         formattedNumber = '+20' + formattedNumber.substring(1);
     } else if (formattedNumber.startsWith('0020')) {
         formattedNumber = '+' + formattedNumber.substring(2);
-    } else if (formattedNumber.startsWith('201') && !formattedNumber.startsWith('+')) {
+    } else if (formattedNumber.startsWith('201') && !formattedNumber.startsWith('+') && formattedNumber.length === 12) {
         formattedNumber = '+' + formattedNumber;
     }
     // إذا لم يبدأ بـ + ولم يكن رقم محلي معروف
@@ -1440,6 +1440,17 @@ async function loadCallHistory() {
         // تحميل المكالمات من localStorage بدلاً من السيرفر
         const calls = JSON.parse(localStorage.getItem('callHistory') || '[]');
         
+        // تحميل جهات الاتصال لعرض الأسماء
+        const baseUrl = window.location.origin;
+        let contacts = [];
+        try {
+            const contactsResponse = await fetch(`${baseUrl}/api/contacts`);
+            const contactsData = await contactsResponse.json();
+            contacts = contactsData.contacts || [];
+        } catch (err) {
+            console.log('لم يتم تحميل جهات الاتصال');
+        }
+        
         const container = document.getElementById('call-history-container');
         container.innerHTML = '';
         
@@ -1464,11 +1475,24 @@ async function loadCallHistory() {
             const callType = call.direction === 'inbound' ? '📥 واردة' : '📤 صادرة';
             const statusColor = call.status === 'completed' ? '#4ECDC4' : '#FF6B6B';
             
+            // البحث عن اسم جهة الاتصال
+            let displayName = call.to;
+            const contact = contacts.find(c => {
+                const cleanContactPhone = c.phone.replace(/[\s-+]/g, '');
+                const cleanCallPhone = call.to.replace(/[\s-+]/g, '');
+                return cleanContactPhone.includes(cleanCallPhone) || cleanCallPhone.includes(cleanContactPhone);
+            });
+            
+            if (contact) {
+                displayName = `👤 ${contact.name}`;
+            }
+            
             const item = document.createElement('div');
             item.className = 'call-item';
             item.innerHTML = `
                 <div class="call-item-info">
-                    <div class="call-item-number">${call.to}</div>
+                    <div class="call-item-number" style="${contact ? 'color: #667eea; font-weight: 600;' : ''}">${displayName}</div>
+                    ${!contact ? `<div style="font-size: 12px; color: #999;">${call.to}</div>` : ''}
                     <div class="call-item-details">
                         <span class="call-item-type">${callType}</span>
                         <span>${formattedDate}</span>
