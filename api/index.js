@@ -1281,49 +1281,65 @@ app.delete('/employees/:id', async (req, res) => {
 // بيانات جهات الاتصال الافتراضية
 let contactsData = { contacts: [] };
 
-// محاولة تحميل من الملف (للتشغيل المحلي)
-try {
-    const data = fs.readFileSync(path.join(__dirname, 'contacts.json'), 'utf8');
-    contactsData = JSON.parse(data);
-    console.log('✅ تم تحميل جهات الاتصال من الملف');
-} catch (error) {
-    console.log('⚠️ سيتم استخدام KV لجهات الاتصال');
+// محاولة تحميل من الملف (للتشغيل المحلي فقط)
+if (!process.env.VERCEL) {
+    try {
+        const data = fs.readFileSync(path.join(__dirname, 'contacts.json'), 'utf8');
+        contactsData = JSON.parse(data);
+        console.log('✅ تم تحميل جهات الاتصال من الملف');
+    } catch (error) {
+        console.log('⚠️ سيتم إنشاء ملف جهات اتصال جديد');
+    }
 }
 
 // دوال مساعدة لقراءة وحفظ جهات الاتصال
 async function getContactsData() {
-    if (kv && process.env.VERCEL) {
-        try {
-            const data = await kv.get('contacts_data');
-            return data || contactsData;
-        } catch (error) {
-            console.error('خطأ في قراءة جهات الاتصال من KV:', error);
-            return contactsData;
+    if (process.env.VERCEL) {
+        // على Vercel نحاول KV أولاً
+        if (kv) {
+            try {
+                const data = await kv.get('contacts_data');
+                if (data) {
+                    console.log('✅ تم تحميل جهات الاتصال من KV');
+                    return data;
+                }
+            } catch (error) {
+                console.error('خطأ في قراءة جهات الاتصال من KV:', error);
+            }
         }
+        // إرجاع البيانات الفارغة إذا لم توجد
+        return { contacts: [] };
     }
     return contactsData;
 }
 
 async function saveContactsData(data) {
-    if (kv && process.env.VERCEL) {
+    if (process.env.VERCEL) {
+        // على Vercel استخدم KV فقط
+        if (!kv) {
+            throw new Error('Vercel KV غير متاح');
+        }
         try {
             await kv.set('contacts_data', data);
+            console.log('✅ تم حفظ جهات الاتصال في KV');
             return true;
         } catch (error) {
             console.error('خطأ في حفظ جهات الاتصال في KV:', error);
-            return false;
+            throw error;
         }
     } else {
+        // للتشغيل المحلي احفظ في ملف
         try {
             fs.writeFileSync(
                 path.join(__dirname, 'contacts.json'),
                 JSON.stringify(data, null, 2)
             );
             contactsData = data;
+            console.log('✅ تم حفظ جهات الاتصال في الملف');
             return true;
         } catch (error) {
             console.error('خطأ في حفظ ملف جهات الاتصال:', error);
-            return false;
+            throw error;
         }
     }
 }
