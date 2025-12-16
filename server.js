@@ -836,6 +836,133 @@ app.delete('/employees/:id', async (req, res) => {
     }
 });
 
+// ========== إدارة جهات الاتصال ==========
+
+// دوال مساعدة لقراءة وحفظ جهات الاتصال
+let contactsData = { contacts: [] };
+
+// تحميل جهات الاتصال من الملف
+try {
+    const data = fs.readFileSync(path.join(__dirname, 'contacts.json'), 'utf8');
+    contactsData = JSON.parse(data);
+    console.log('✅ تم تحميل جهات الاتصال من الملف');
+} catch (error) {
+    console.log('⚠️ سيتم إنشاء ملف جهات اتصال جديد');
+}
+
+async function getContactsData() {
+    if (kv && process.env.VERCEL) {
+        try {
+            const data = await kv.get('contacts_data');
+            return data || contactsData;
+        } catch (error) {
+            console.error('خطأ في قراءة جهات الاتصال من KV:', error);
+            return contactsData;
+        }
+    }
+    return contactsData;
+}
+
+async function saveContactsData(data) {
+    if (kv && process.env.VERCEL) {
+        try {
+            await kv.set('contacts_data', data);
+            return true;
+        } catch (error) {
+            console.error('خطأ في حفظ جهات الاتصال في KV:', error);
+            return false;
+        }
+    } else {
+        // حفظ في ملف للتشغيل المحلي
+        try {
+            fs.writeFileSync(
+                path.join(__dirname, 'contacts.json'),
+                JSON.stringify(data, null, 2)
+            );
+            contactsData = data;
+            return true;
+        } catch (error) {
+            console.error('خطأ في حفظ ملف جهات الاتصال:', error);
+            return false;
+        }
+    }
+}
+
+// جلب جميع جهات الاتصال
+app.get('/api/contacts', async (req, res) => {
+    try {
+        const data = await getContactsData();
+        res.json(data);
+    } catch (error) {
+        console.error('خطأ في جلب جهات الاتصال:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// إضافة جهة اتصال جديدة
+app.post('/api/contacts', async (req, res) => {
+    try {
+        const { name, phone } = req.body;
+        
+        if (!name || !phone) {
+            return res.status(400).json({ error: 'الاسم ورقم الهاتف مطلوبان' });
+        }
+        
+        const data = await getContactsData();
+        
+        // التحقق من عدم تكرار الرقم
+        const exists = data.contacts.find(c => c.phone === phone);
+        if (exists) {
+            return res.status(400).json({ error: 'رقم الهاتف موجود بالفعل' });
+        }
+        
+        const newContact = {
+            id: Date.now(),
+            name,
+            phone,
+            createdAt: new Date().toISOString(),
+            createdBy: req.body.createdBy || 'unknown'
+        };
+        
+        data.contacts.push(newContact);
+        await saveContactsData(data);
+        
+        console.log('✅ تمت إضافة جهة اتصال:', name, phone);
+        res.json({ success: true, contact: newContact });
+    } catch (error) {
+        console.error('خطأ في إضافة جهة اتصال:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// حذف جهة اتصال
+app.delete('/api/contacts', async (req, res) => {
+    try {
+        const id = parseInt(req.query.id);
+        
+        if (!id) {
+            return res.status(400).json({ error: 'معرف جهة الاتصال مطلوب' });
+        }
+        
+        const data = await getContactsData();
+        const contactIndex = data.contacts.findIndex(c => c.id === id);
+        
+        if (contactIndex === -1) {
+            return res.status(404).json({ error: 'جهة الاتصال غير موجودة' });
+        }
+        
+        const contact = data.contacts[contactIndex];
+        data.contacts.splice(contactIndex, 1);
+        await saveContactsData(data);
+        
+        console.log('✅ تم حذف جهة اتصال:', contact.name);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('خطأ في حذف جهة اتصال:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // بدء الخادم
 app.listen(PORT, () => {
     console.log(`\n✅ الخادم يعمل على http://localhost:${PORT}`);
