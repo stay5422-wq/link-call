@@ -11,13 +11,18 @@ module.exports = async (req, res) => {
     }
 
     try {
+        console.log('📊 Work tracking request:', req.method, req.body);
+        
         const { action, employeeId, employeeName, data } = req.body || {};
 
         if (!action || !employeeId) {
+            console.log('❌ Missing action or employeeId');
             return res.status(400).json({ 
                 error: 'يجب تحديد action و employeeId' 
             });
         }
+        
+        console.log(`✅ Processing action: ${action} for employee: ${employeeId}`);
 
         const timestamp = new Date().toISOString();
         const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
@@ -221,9 +226,12 @@ module.exports = async (req, res) => {
 
     } catch (error) {
         console.error('❌ خطأ في تتبع العمل:', error);
+        console.error('Error stack:', error.stack);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         return res.status(500).json({ 
             error: 'فشل في تتبع العمل',
-            details: error.message 
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 };

@@ -1909,6 +1909,8 @@ async function loadWorkReports(startDate, endDate) {
             },
             body: JSON.stringify({
                 action: 'get-all-reports',
+                employeeId: 'admin', // مطلوب للـ validation
+                employeeName: 'المطور الرئيسي',
                 data: {
                     reportStartDate: startDate,
                     reportEndDate: endDate
@@ -1918,6 +1920,7 @@ async function loadWorkReports(startDate, endDate) {
         
         const data = await response.json();
         
+        console.log('📊 Response from work-tracking API:', data);
         if (data.success && data.reports) {
             displayWorkReports(data.reports);
         } else {
