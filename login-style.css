@@ -53,7 +53,7 @@ body {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-radius: 20px;
-    padding: 30px 30px;
+    padding: 40px 35px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: slideUp 0.6s ease-out;
 }
@@ -72,13 +72,13 @@ body {
 /* الشعار */
 .logo-container {
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 25px;
 }
 
 .login-logo {
-    width: 80px;
+    width: 150px;
     height: auto;
-    max-height: 80px;
+    max-height: 150px;
     object-fit: contain;
     display: block;
     margin: 0 auto;
@@ -88,22 +88,22 @@ body {
 h1 {
     text-align: center;
     color: #333;
-    font-size: 24px;
-    margin-bottom: 5px;
+    font-size: 28px;
+    margin-bottom: 10px;
     font-weight: 700;
 }
 
 .subtitle {
     text-align: center;
     color: #666;
-    font-size: 13px;
-    margin-bottom: 20px;
+    font-size: 15px;
+    margin-bottom: 30px;
 }
 
 /* مجموعة الإدخال */
 .input-group {
     position: relative;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .input-group label {
