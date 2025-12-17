@@ -7,6 +7,10 @@ let isRecording = false;
 let callCheckInterval = null;
 let phoneNumber = ''; // متغير لتخزين رقم الهاتف
 
+// 🔥 DEBUG: طباعة معلومات في بداية التحميل
+console.log('🔥 app.js loaded - Version: 2.0.20251218');
+console.log('🔥 Current URL:', window.location.href);
+
 // عناصر الواجهة
 const displayNumber = document.getElementById('display-number');
 const dialpad = document.getElementById('dialpad');
