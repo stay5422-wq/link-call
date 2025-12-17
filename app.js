@@ -56,8 +56,7 @@ let recordings = [];
 let device = null;
 let currentCall = null;
 
-// قراءة بيانات من URL قبل أي شيء
-const urlParams = new URLSearchParams(window.location.search);
+// قراءة بيانات من URL قبل أي شيء (urlParams معرّف في index.html)
 const phoneFromUrl = urlParams.get('phone');
 const autoLogin = urlParams.get('autoLogin');
 const employeeId = urlParams.get('employeeId');
