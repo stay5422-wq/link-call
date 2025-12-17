@@ -1911,6 +1911,40 @@ if (autoLogin === 'true' && employeeId && employeeName) {
     }).catch(err => console.log('⏰ تسجيل الوقت سيتم لاحقاً'));
 }
 
+// ===== استقبال أرقام جديدة من CRM عبر postMessage =====
+window.addEventListener('message', (event) => {
+    // التأكد من المصدر
+    if (event.origin !== 'https://hotel-app-dce62.web.app' && !event.origin.includes('localhost')) {
+        return;
+    }
+    
+    if (event.data && event.data.type === 'NEW_CALL') {
+        console.log('📞 استقبال مكالمة جديدة من CRM:', event.data.phone);
+        
+        // تحديث الرقم
+        phoneNumber = event.data.phone;
+        if (displayNumber) {
+            displayNumber.textContent = event.data.phone;
+            updateDeleteButton();
+        }
+        
+        // بدء المكالمة تلقائياً
+        if (device && device.state === 'registered') {
+            console.log('✅ بدء المكالمة الجديدة...');
+            setTimeout(() => makeCall(), 500);
+        } else {
+            console.log('⏳ انتظار اتصال Twilio...');
+            const checkInterval = setInterval(() => {
+                if (device && device.state === 'registered') {
+                    clearInterval(checkInterval);
+                    makeCall();
+                }
+            }, 500);
+            setTimeout(() => clearInterval(checkInterval), 10000);
+        }
+    }
+});
+
 // ===== وظائف تقارير ساعات العمل =====
 
 // تحميل تقرير ساعات العمل
