@@ -56,30 +56,29 @@ let recordings = [];
 let device = null;
 let currentCall = null;
 
-// قراءة بيانات من URL قبل أي شيء (urlParams معرّف في index.html)
+// قراءة بيانات من URL قبل أي شيء (urlParams و autoLogin معرّفين في index.html)
 const phoneFromUrl = urlParams.get('phone');
-const autoLogin = urlParams.get('autoLogin');
-const employeeId = urlParams.get('employeeId');
-const employeeName = urlParams.get('employeeName');
+const empId = urlParams.get('employeeId');
+const empName = urlParams.get('employeeName');
 
 console.log('🔍 قراءة URL Parameters:');
 console.log('  - URL الكامل:', window.location.href);
 console.log('  - phone:', phoneFromUrl);
 console.log('  - autoLogin:', autoLogin);
-console.log('  - employeeId:', employeeId);
-console.log('  - employeeName:', employeeName);
+console.log('  - employeeId:', empId);
+console.log('  - employeeName:', empName);
 
 // تسجيل دخول تلقائي إذا جاء من CRM
-if (autoLogin === 'true' && employeeId && employeeName) {
-    console.log('🔐 تسجيل دخول تلقائي من CRM:', employeeName);
+if (autoLogin === 'true' && empId && empName) {
+    console.log('🔐 تسجيل دخول تلقائي من CRM:', empName);
     
     sessionStorage.setItem('isLoggedIn', 'true');
-    sessionStorage.setItem('username', employeeId);
+    sessionStorage.setItem('username', empId);
     sessionStorage.setItem('userRole', 'employee');
-    sessionStorage.setItem('fullname', decodeURIComponent(employeeName));
-    sessionStorage.setItem('employeeId', employeeId);
-    localStorage.setItem('employeeId', employeeId);
-    localStorage.setItem('employeeName', decodeURIComponent(employeeName));
+    sessionStorage.setItem('fullname', decodeURIComponent(empName));
+    sessionStorage.setItem('employeeId', empId);
+    localStorage.setItem('employeeId', empId);
+    localStorage.setItem('employeeName', decodeURIComponent(empName));
 }
 
 // إذا كان هناك رقم، نخزنه
