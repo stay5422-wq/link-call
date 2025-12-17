@@ -244,18 +244,22 @@ app.get('/login.html', (req, res) => {
 
 // Routes للملفات الثابتة (CSS, JS, Images)
 app.get('/style.css', (req, res) => {
+    res.setHeader('Content-Type', 'text/css');
     res.sendFile(path.join(__dirname, '..', 'style.css'));
 });
 
 app.get('/login-style.css', (req, res) => {
+    res.setHeader('Content-Type', 'text/css');
     res.sendFile(path.join(__dirname, '..', 'login-style.css'));
 });
 
 app.get('/app.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
     res.sendFile(path.join(__dirname, '..', 'app.js'));
 });
 
 app.get('/logo.jpg', (req, res) => {
+    res.setHeader('Content-Type', 'image/jpeg');
     res.sendFile(path.join(__dirname, '..', 'logo.jpg'));
 });
 
