@@ -116,12 +116,14 @@ h1 {
 
 .input-group input {
     width: 100%;
-    padding: 14px 45px 14px 15px;
+    padding: 14px 15px;
+    padding-right: 45px;
     border: 2px solid #e0e0e0;
     border-radius: 10px;
     font-size: 15px;
     transition: all 0.3s;
     background: #f8f9fa;
+    text-align: right;
 }
 
 .input-group input:focus {
@@ -133,14 +135,15 @@ h1 {
 
 .input-group .icon {
     position: absolute;
-    left: 15px;
+    right: 15px;
     top: 43px;
     font-size: 18px;
+    pointer-events: none;
 }
 
 .toggle-password {
     position: absolute;
-    left: 15px;
+    right: 15px;
     top: 43px;
     background: none;
     border: none;
@@ -149,6 +152,7 @@ h1 {
     padding: 5px;
     opacity: 0.6;
     transition: opacity 0.3s;
+    z-index: 10;
 }
 
 .toggle-password:hover {
@@ -243,16 +247,6 @@ h1 {
 }
 
 /* تحسينات RTL */
-html[dir="rtl"] .input-group input {
-    padding: 14px 15px 14px 45px;
-}
-
-html[dir="rtl"] .input-group .icon,
-html[dir="rtl"] .toggle-password {
-    left: auto;
-    right: 15px;
-}
-
 html[dir="rtl"] .login-btn .arrow {
     transform: scaleX(-1);
 }
