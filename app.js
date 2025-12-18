@@ -81,10 +81,15 @@ if (autoLogin === 'true' && empId && empName) {
     localStorage.setItem('employeeName', decodeURIComponent(empName));
 }
 
-// إذا كان هناك رقم، نخزنه
+// إذا كان هناك رقم، نخزنه بعد تنظيفه
 if (phoneFromUrl) {
-    phoneNumber = phoneFromUrl;
+    // تنظيف الرقم من الأحرف الخاصة والمسافات
+    phoneNumber = phoneFromUrl
+        .replace(/[\u200E\u200F\u202A\u202B\u202C\u202D\u202E\uFEFF]/g, '') // حذف Right-to-Left و Left-to-Right marks
+        .replace(/[\s\-\(\)]/g, ''); // حذف المسافات والشرطات والأقواس
+    
     console.log('📞 تم استقبال رقم من URL:', phoneFromUrl);
+    console.log('📞 الرقم بعد التنظيف:', phoneNumber);
     console.log('📞 تم حفظ الرقم في phoneNumber:', phoneNumber);
 } else {
     console.log('⚠️ لا يوجد رقم في URL');
@@ -239,35 +244,14 @@ async function makeCall() {
         return;
     }
 
-    // تحويل الرقم للصيغة الدولية
-    let formattedNumber = phoneNumber.replace(/[\s-]/g, '');
+    // تنظيف الرقم من المسافات والأحرف الخاصة فقط - بدون تحويل
+    // إزالة جميع المسافات والأحرف الخاصة غير المرئية والشرطات
+    let formattedNumber = phoneNumber
+        .replace(/[\u200E\u200F\u202A\u202B\u202C\u202D\u202E\uFEFF]/g, '') // حذف Right-to-Left و Left-to-Right marks
+        .replace(/[\s\-\(\)]/g, ''); // حذف المسافات والشرطات والأقواس
     
-    // تحويل الأرقام السعودية
-    if (formattedNumber.startsWith('05')) {
-        formattedNumber = '+966' + formattedNumber.substring(1);
-    } else if (formattedNumber.startsWith('00966')) {
-        formattedNumber = '+' + formattedNumber.substring(2);
-    } else if (formattedNumber.startsWith('9665') && !formattedNumber.startsWith('+')) {
-        formattedNumber = '+' + formattedNumber;
-    }
-    // تحويل الأرقام المصرية (01, 010, 011, 012, 015, 017)
-    else if (formattedNumber.startsWith('01') && formattedNumber.length === 11) {
-        formattedNumber = '+20' + formattedNumber.substring(1);
-    } else if (formattedNumber.startsWith('0020')) {
-        formattedNumber = '+' + formattedNumber.substring(2);
-    } else if (formattedNumber.startsWith('201') && !formattedNumber.startsWith('+') && formattedNumber.length === 12) {
-        formattedNumber = '+' + formattedNumber;
-    }
-    // إذا لم يبدأ بـ + ولم يكن رقم محلي معروف
-    else if (!formattedNumber.startsWith('+') && formattedNumber.length > 10) {
-        formattedNumber = '+' + formattedNumber;
-    }
-    // إذا رقم قصير (محلي سعودي)
-    else if (!formattedNumber.startsWith('+') && formattedNumber.length <= 10) {
-        formattedNumber = '+966' + formattedNumber;
-    }
-
-    console.log('📞 اتصال مباشر إلى:', formattedNumber);
+    console.log('🔍 الرقم بعد التنظيف:', formattedNumber);
+    console.log('📞 اتصال مباشر بالرقم:', formattedNumber);
     
     try {
         if (!device) {
@@ -317,42 +301,57 @@ async function makeCall() {
         
         // معالجة أحداث المكالمة
         currentCall.on('accept', () => {
-            console.log('📞 المكالمة بدأت - جاري الاتصال بالعميل...');
+            console.log('📞 تم إنشاء المكالمة - جاري الاتصال...');
             updateCallStatus('جاري الاتصال... 📞');
             // لا نبدأ العداد هنا - ننتظر العميل يرد
         });
         
         currentCall.on('ringing', () => {
             console.log('📞 الرنين...');
-            updateCallStatus('جاري الاتصال... 🔔');
+            updateCallStatus('رنين... 🔔');
         });
         
-        // هذا الحدث يُطلق عندما يرد العميل فعلياً
+        // هذا الحدث يُطلق عندما يرد العميل فعلياً - نبدأ العداد هنا
         currentCall.on('connected', () => {
             console.log('✅ العميل رد على المكالمة - بدء العداد');
             updateCallStatus('متصل ✅');
-            startCallTimer(); // نبدأ العداد هنا فقط
+            startCallTimer(); // بدء العداد فقط عند رد العميل
         });
         
         currentCall.on('disconnect', () => {
             console.log('⏹️ انتهت المكالمة');
+            // التحقق إذا كان العداد لم يبدأ (يعني العميل لم يرد)
+            if (!callTimer) {
+                updateCallStatus('لم يتم الرد');
+            }
             endCall();
         });
         
         currentCall.on('cancel', () => {
-            console.log('🚫 تم إلغاء المكالمة');
-            endCall();
+            console.log('🚫 تم إلغاء المكالمة من قبل العميل');
+            updateCallStatus('تم إلغاء المكالمة من العميل 🚫');
+            setTimeout(() => endCall(), 1500);
         });
         
         currentCall.on('reject', () => {
-            console.log('❌ تم رفض المكالمة');
-            endCall();
+            console.log('❌ تم رفض المكالمة من العميل');
+            updateCallStatus('رفض العميل المكالمة ❌');
+            setTimeout(() => endCall(), 1500);
         });
         
         currentCall.on('error', (error) => {
             console.error('❌ خطأ في المكالمة:', error);
-            alert('خطأ في المكالمة: ' + error.message);
-            endCall();
+            // تحليل نوع الخطأ
+            let errorMsg = 'خطأ في المكالمة';
+            if (error.message && error.message.includes('busy')) {
+                errorMsg = 'العميل مشغول حالياً';
+            } else if (error.message && error.message.includes('no answer')) {
+                errorMsg = 'لم يرد العميل';
+            } else if (error.message && error.message.includes('invalid')) {
+                errorMsg = 'رقم غير صحيح';
+            }
+            updateCallStatus(errorMsg + ' ⚠️');
+            setTimeout(() => endCall(), 2000);
         });
         
     } catch (error) {

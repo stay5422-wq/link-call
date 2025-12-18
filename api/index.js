@@ -28,22 +28,7 @@ let employeesData = {
             phone: "",
             permissions: {
                 viewOwnRecordings: true,
-                viewAllRecordings: false,
-                deleteRecordings: false,
-                editProfile: true
-            },
-            createdAt: "2025-12-08T00:00:00.000Z"
-        },
-        {
-            id: 2,
-            name: "ساهر",
-            username: "saher",
-            password: "Aa123456",
-            department: "2",
-            phone: "",
-            permissions: {
-                viewOwnRecordings: true,
-                viewAllRecordings: false,
+                viewAllRecordings: true,
                 deleteRecordings: false,
                 editProfile: true
             },
@@ -58,22 +43,7 @@ let employeesData = {
             phone: "",
             permissions: {
                 viewOwnRecordings: true,
-                viewAllRecordings: false,
-                deleteRecordings: false,
-                editProfile: true
-            },
-            createdAt: "2025-12-08T00:00:00.000Z"
-        },
-        {
-            id: 4,
-            name: "تسنيم",
-            username: "tasneem",
-            password: "Aa123456",
-            department: "4",
-            phone: "",
-            permissions: {
-                viewOwnRecordings: true,
-                viewAllRecordings: false,
+                viewAllRecordings: true,
                 deleteRecordings: false,
                 editProfile: true
             },
@@ -451,11 +421,33 @@ async function getCallEmployeeId(callSid) {
 }
 
 app.post('/outgoing-call', (req, res) => {
-    const toNumber = req.body.To;
+    let toNumber = req.body.To;
     const employeeId = req.body.employeeId || 'unknown';
     
-    console.log('📞 اتصال صادر من المتصفح إلى:', toNumber);
+    console.log('📞 اتصال صادر من المتصفح - الرقم الأصلي:', toNumber);
     console.log('👤 معرف المدير:', employeeId);
+    
+    // تنظيف الرقم فقط - بدون تحويل
+    if (toNumber) {
+        // حذف أي أحرف خاصة أو مسافات
+        toNumber = toNumber.replace(/[\u200E\u200F\u202A\u202B\u202C\u202D\u202E\uFEFF\s\-\(\)]/g, '');
+        
+        console.log('🔍 الرقم بعد التنظيف:', toNumber);
+        
+        // إصلاح فقط إذا كان فيه +966 وبعده 0 (خطأ)
+        if (toNumber.match(/^\+9660[1-9]\d{7,8}$/)) {
+            toNumber = toNumber.replace(/^\+9660/, '+966');
+            console.log('🔧 تم إصلاح +9660 إلى +966:', toNumber);
+        }
+        // إصلاح +200 (المصرية الخاطئة)
+        else if (toNumber.match(/^\+200\d+$/)) {
+            toNumber = toNumber.replace(/^\+200/, '+20');
+            console.log('🔧 تم إصلاح +200 إلى +20:', toNumber);
+        }
+        // باقي الأرقام تُترك كما هي
+    }
+    
+    console.log('📞 الرقم النهائي للاتصال:', toNumber);
     
     const twiml = new twilio.twiml.VoiceResponse();
     
