@@ -57,7 +57,7 @@ let device = null;
 let currentCall = null;
 
 // قراءة بيانات من URL قبل أي شيء (urlParams و autoLogin معرّفين في index.html)
-const phoneFromUrl = urlParams.get('phone');
+const phoneFromUrl = urlParams.get('phone') || urlParams.get('number');
 const empId = urlParams.get('employeeId');
 const empName = urlParams.get('employeeName');
 
@@ -1920,7 +1920,7 @@ document.addEventListener('visibilitychange', async () => {
 initializeApp();
 
 // تسجيل وقت الدخول للموظفين من CRM
-if (autoLogin === 'true' && employeeId && employeeName) {
+if (autoLogin === 'true' && empId && empName) {
     const baseUrl = window.location.origin;
     fetch(`${baseUrl}/work-tracking`, {
         method: 'POST',
@@ -1929,8 +1929,8 @@ if (autoLogin === 'true' && employeeId && employeeName) {
         },
         body: JSON.stringify({
             action: 'login',
-            employeeId: employeeId,
-            employeeName: decodeURIComponent(employeeName)
+            employeeId: empId,
+            employeeName: decodeURIComponent(empName)
         })
     }).catch(err => console.log('⏰ تسجيل الوقت سيتم لاحقاً'));
 }

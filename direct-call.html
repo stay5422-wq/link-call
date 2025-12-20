@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Call - مكالمة مباشرة</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            direction: rtl;
+        }
+        
+        .redirect-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+        }
+        
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .phone-number {
+            font-size: 28px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+            direction: ltr;
+        }
+        
+        .loading {
+            margin: 20px 0;
+        }
+        
+        .loading-bar {
+            width: 100%;
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+        
+        .message {
+            color: #666;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+        
+        .error {
+            color: #e74c3c;
+            margin-top: 20px;
+            padding: 15px;
+            background: #fee;
+            border-radius: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-container">
+        <div class="icon">📞</div>
+        <h1>Link Call</h1>
+        <div class="phone-number" id="phone-display">جاري التحميل...</div>
+        <div class="loading">
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+        <div class="message">جاري تحضير المكالمة...</div>
+        <div class="error" id="error-message"></div>
+    </div>
+
+    <script>
+        // الحصول على معاملات URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const phoneNumber = urlParams.get('phone') || urlParams.get('number');
+        const employeeId = urlParams.get('employeeId');
+        const employeeName = urlParams.get('employeeName');
+        
+        const phoneDisplay = document.getElementById('phone-display');
+        const errorMessage = document.getElementById('error-message');
+        
+        // التحقق من وجود رقم الهاتف
+        if (!phoneNumber) {
+            errorMessage.textContent = 'خطأ: لم يتم توفير رقم الهاتف';
+            errorMessage.style.display = 'block';
+            phoneDisplay.textContent = 'رقم غير متوفر';
+        } else {
+            phoneDisplay.textContent = phoneNumber;
+            
+            // تسجيل دخول تلقائي وتجهيز الجلسة
+            sessionStorage.setItem('isLoggedIn', 'true');
+            sessionStorage.setItem('username', 'crm_user');
+            sessionStorage.setItem('userRole', 'crm');
+            sessionStorage.setItem('fullname', 'مستخدم CRM');
+            sessionStorage.setItem('canViewRecordings', 'false');
+            
+            // حفظ بيانات الموظف إذا كانت موجودة
+            if (employeeId) {
+                localStorage.setItem('employeeId', employeeId);
+                sessionStorage.setItem('employeeId', employeeId);
+            }
+            if (employeeName) {
+                localStorage.setItem('employeeName', employeeName);
+                sessionStorage.setItem('fullname', employeeName);
+            }
+            
+            // إعادة التوجيه إلى الصفحة الرئيسية مع رقم الهاتف
+            setTimeout(() => {
+                const redirectUrl = `index.html?autoLogin=true&number=${encodeURIComponent(phoneNumber)}` +
+                    (employeeId ? `&employeeId=${encodeURIComponent(employeeId)}` : '') +
+                    (employeeName ? `&employeeName=${encodeURIComponent(employeeName)}` : '');
+                
+                window.location.href = redirectUrl;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
